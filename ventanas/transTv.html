@@ -1,0 +1,218 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+
+
+    <script  type="text/javascript" >
+ window.onload = function(){
+  document.getElementById("btnplay").onmouseover = function(){document.getElementById("start").style.visibility="visible"};
+  document.getElementById("btnplay").onmouseout = function(){document.getElementById("start").style.visibility="hidden"};
+ } 
+
+</script>
+    <script>
+    document.createElement('article');
+    document.createElement('footer');
+    </script>
+<script>
+    $(document).ready(function(){
+      // despues del código
+      $('.start').click();
+    });
+    </script>
+    <!-- script used for audio/video/gif recording -->
+    <script src="https://www.webrtc-experiment.com/RecordRTC.js"></script>
+    <script src="https://www.webrtc-experiment.com/DetectRTC.js"></script>
+    <script src="https://www.webrtc-experiment.com/gif-recorder.js"></script>
+    <script src="https://www.webrtc-experiment.com/getMediaElement.js"></script>
+
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+</head>
+
+<body>
+    <article>
+      
+      
+
+        <section class="experiment" >
+           <div id = "btnplay">
+               
+            <button id="start" width="10" height="10" style="visibility: hidden;"><img src="play.png" alt="x"/></button>
+            </div>
+            
+            <button id="stop" style="display: none;">Stop</button>
+            <button id="get" style="display: none;">Get</button>
+            <button id="save" disabled style="display: none;">Save</button>
+            <div id="videos-container"  width="1000" height="1000"></div>
+            <audio id="audio"></audio>
+        </section>
+
+        <script>
+        function captureUserMedia(mediaConstraints, successCallback, errorCallback) {
+            navigator.mediaDevices.getUserMedia(mediaConstraints).then(successCallback).catch(errorCallback);
+        }
+
+        var videosContainer = document.getElementById('videos-container');
+
+        var mRecordRTC = new MRecordRTC();
+        mRecordRTC.mediaType = {
+            audio: true, // or StereoAudioRecorder or MediaStreamRecorder (WebAssembly also supports audio-encoding however not implemented in WebAssemblyRecorder YET)
+            video: true  // or WhammyRecorder      or MediaStreamRecorder or WebAssemblyRecorder or CanvasRecorder
+        };
+
+        if (DetectRTC.browser.name === 'Edge') {
+            // Microsoft Edge currently supports only audio and gif recording
+            mRecordRTC.mediaType = {
+                audio: StereoAudioRecorder
+            };
+        }
+        // mRecordRTC.bufferSize = 16384;
+
+        document.querySelector('#start').onclick = function() {
+            this.disabled = true;
+
+            captureUserMedia({
+                audio: true,
+                video: true
+            }, function(stream) {
+                var video = document.createElement('video');
+                video.autoplay = true;
+                video.srcObject = stream;
+
+                var mediaElement = getMediaElement(video, {
+                    buttons: [],
+                    showOnMouseEnter: false,
+                    enableTooltip: false,
+                    onMuted: function() {
+                        document.querySelector('#audio').muted = true;
+                    },
+                    onUnMuted: function() {
+                        document.querySelector('#audio').muted = false;
+                        document.querySelector('#audio').play();
+                    }
+                });
+                videosContainer.appendChild(mediaElement);
+
+                mRecordRTC.addStream(stream);
+                mRecordRTC.startRecording();
+            }, function(error) {
+                alert(JSON.stringify(error));
+            });
+        };
+
+        document.querySelector('#stop').onclick = function() {
+            this.disabled = true;
+
+            mRecordRTC.stopRecording(function(url, type) {
+                document.querySelector(type).srcObject = null;
+                document.querySelector(type).src = url;
+                document.querySelector(type).play();
+
+                // fixing firefox playback issue
+                if (!!navigator.mozGetUserMedia) {
+                    document.querySelector(type).onended = function() {
+                        document.querySelector(type).srcObject = null;
+                        document.querySelector(type).src = URL.createObjectURL(mRecordRTC.getBlob()[type]);
+                        document.querySelector(type).play();
+                    };
+                }
+
+                mRecordRTC.writeToDisk();
+                save.disabled = false;
+            });
+        };
+
+        document.getElementById('save').onclick = function() {
+            this.disabled = true;
+            mRecordRTC.save();
+        };
+
+        document.querySelector('#get').onclick = function() {
+            this.disabled = true;
+
+            !!navigator.webkitGetUserMedia && MRecordRTC.getFromDisk('all', function(dataURL, type) {
+                if (!dataURL) return;
+
+                if (type == 'audio') {
+                    document.querySelector('#audio').src = dataURL;
+                }
+                if (type == 'video') {
+                    var video = document.createElement('video');
+                    video.src = dataURL;
+                    var mediaElement = getMediaElement(video, {
+                        buttons: ['mute-video'],
+                        showOnMouseEnter: false,
+                        enableTooltip: false,
+                        onMuted: function() {
+                            document.querySelector('#audio').muted = true;
+                        },
+                        onUnMuted: function() {
+                            document.querySelector('#audio').muted = false;
+                            document.querySelector('#audio').play();
+                        }
+                    });
+                    videosContainer.appendChild(mediaElement);
+                    document.querySelector('#audio').play();
+                    mediaElement.media.play();
+                }
+
+                if (type == 'gif') {
+                    var gifImage = document.createElement('img');
+                    gifImage.src = dataURL;
+                    videosContainer.appendChild(gifImage);
+                }
+            });
+
+            !!navigator.mozGetUserMedia && MRecordRTC.getFromDisk('video', function(dataURL) {
+                if (!dataURL) return;
+
+                var video = document.createElement('video');
+                video.src = dataURL;
+                var mediaElement = getMediaElement(video, {
+                    buttons: ['mute-video'],
+                    showOnMouseEnter: false,
+                    enableTooltip: false,
+                    onMuted: function() {
+                        mediaElement.muted = true;
+                    },
+                    onUnMuted: function() {
+                        mediaElement.muted = false;
+                        mediaElement.play();
+                    }
+                });
+                videosContainer.appendChild(mediaElement);
+                mediaElement.media.play();
+            });
+        };
+
+        window.addEventListener('beforeunload', function() {
+            document.querySelector('#start').disabled = false;
+            document.querySelector('#stop').disabled = false;
+            document.querySelector('#get').disabled = false;
+        }, false);
+        </script>
+
+       
+
+        
+       
+
+     
+
+    
+
+     <a href="https://github.com/muaz-khan/RecordRTC/tree/master/MRecordRTC" class="fork-left"></a>
+
+
+
+    <!-- commits.js is useless for you! -->
+    <script>
+        window.useThisGithubPath = 'muaz-khan/RecordRTC';
+    </script>
+    <script src="https://www.webrtc-experiment.com/commits.js" async></script>
+</body>
+
+</html>

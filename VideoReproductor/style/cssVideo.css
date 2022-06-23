@@ -1,0 +1,37 @@
+
+nav{
+
+	margin: 5px 0;
+}
+
+#botones{
+	float: left;
+	width: 100px;
+	height: 20px;
+}
+
+#barra{
+	background: #ffffff;
+	width: 600px;
+	height: 16px;
+	border: 1px solid #666;
+	padding: 3px;
+	margin-left: 80px; 
+}
+
+#progreso{
+	position: absolute;
+	width: 0px;
+	height: 16px;
+	background: #000000;
+}
+
+.selec{
+  position: relative;
+  top: 1px;
+  left: 0px;
+}
+
+#reproducir{
+	visibility: hidden;
+}

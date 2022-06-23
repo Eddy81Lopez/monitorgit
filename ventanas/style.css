@@ -1,0 +1,74 @@
+
+
+.sometext {
+	font-family: Tahoma;
+	font-size: 2.5rem;
+	text-transform: uppercase;
+    	color: #FFFFFF ;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+	min-height: 50vh;     
+}
+
+@media (max-width: 780px) {
+    .sometext {
+	font-size: 1.2rem;
+	color: #FFFFFF;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+	min-height: 50vh; 
+    }
+}
+.mydiv {
+	position: relative;
+	margin: 0% auto 0;
+	width: 100%;
+	height: 70px;
+    	background: linear-gradient(90deg, #04b7ef , #04b7ef  , #04b7ef  ); 
+    top: 50%;
+}
+
+h1:before {
+	content: '';
+	animation: changingTxt 10s linear infinite;
+}
+
+@keyframes changingTxt {
+	0% {
+		content: 'AQUI';
+	}
+	20% {
+		content: 'AQUI';
+	}
+	40% {
+		content: 'AQUI';
+	}
+	60% {
+		content: 'AQUI';
+	}
+	80% {
+		content: 'AQUI';
+	}
+	100% {
+		content: 'AQUI';
+	}
+}
+
+
+
+@keyframes BGgradient {
+	0% {
+		background-position: 0% 200%;
+	}
+	50% {
+		background-position: 200% 0%;
+	}
+	100% {
+		background-position: 0% 330%;
+	}
+}
+
